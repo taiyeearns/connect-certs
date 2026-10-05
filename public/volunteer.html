@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GritinAI Connect 2.0 — Volunteer Feedback & Certificates</title>
+  <meta name="description" content="Volunteer feedback portal to claim your official Certificate of Service and Certificate of Attendance.">
+
+  <!-- Google Fonts: Space Grotesk & Space Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/png" href="assets/connect2.png">
+
+  <!-- jsPDF for instant client-side vector PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- Top Header - Logo only -->
+  <header class="header-bar">
+    <a href="#" class="brand-logo-link">
+      <img src="assets/connect2.png" alt="GritinAI Connect 2.0 Logo" class="brand-logo-img">
+    </a>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-wrapper">
+
+    <!-- Intro -->
+    <section class="page-intro">
+      <h1 class="main-heading">Volunteer Appreciation & Feedback</h1>
+      <p class="main-subheading">
+        Thank you for your tireless dedication to making GritinAI Connect 2.0 a huge success! Submit your quick feedback below to claim your official <strong>Certificate of Service</strong>.
+      </p>
+    </section>
+
+    <!-- 2-Column Layout -->
+    <div class="portal-grid">
+
+      <!-- Form Column -->
+      <section class="card-box">
+        <h2 class="card-title">Volunteer Debrief</h2>
+        <p class="card-subtitle">Your insights help us support our volunteer teams even better next time.</p>
+
+        <form id="volunteerFeedbackForm">
+          
+          <!-- Full Name -->
+          <div class="form-field">
+            <label for="fullName" class="field-label">
+              <span>FULL NAME FOR CERTIFICATE</span>
+              <span style="color: var(--blue);">*</span>
+            </label>
+            <input type="text" id="fullName" class="field-input" placeholder="e.g. Blessing Johnson" required autocomplete="name" maxlength="50">
+            <span style="font-size: 13px; color: var(--text-grey); margin-top: 5px; display: block;">This exact name will be rendered onto your official certificate.</span>
+          </div>
+
+          <!-- Email -->
+          <div class="form-field">
+            <label for="email" class="field-label">
+              <span>EMAIL ADDRESS</span>
+              <span style="color: var(--blue);">*</span>
+            </label>
+            <input type="email" id="email" class="field-input" placeholder="blessing@example.com" required autocomplete="email">
+          </div>
+
+          <!-- Team Selection -->
+          <div class="form-field">
+            <label for="volunteerTeam" class="field-label">
+              <span>VOLUNTEER TEAM / DEPARTMENT</span>
+              <span style="color: var(--blue);">*</span>
+            </label>
+            <select id="volunteerTeam" class="field-select">
+              <option value="Ushering & Protocol">Ushering & Protocol</option>
+              <option value="Media, Content & Technical">Media, Content & Technical</option>
+              <option value="Registration">Registration</option>
+              <option value="Welfare, Logistics & Operations">Welfare, Logistics & Operations</option>
+            </select>
+          </div>
+
+          <!-- Perfectly Aligned Rating Slider -->
+          <div class="form-field">
+            <label for="volunteerRatingSlider" class="field-label">
+              <span>VOLUNTEERING EXPERIENCE RATING</span>
+              <span id="sliderValueText" class="field-label-value">5 / 5 — Outstanding</span>
+            </label>
+            <div class="slider-wrapper">
+              <input type="range" id="volunteerRatingSlider" class="rating-slider" min="1" max="5" step="1" value="5">
+              <div class="slider-scale" id="sliderScale">
+                <div class="scale-step active" data-step="1">
+                  <span class="step-dot"></span>
+                  <span class="step-num">1</span>
+                  <span class="step-label">Poor</span>
+                </div>
+                <div class="scale-step active" data-step="2">
+                  <span class="step-dot"></span>
+                  <span class="step-num">2</span>
+                  <span class="step-label">Fair</span>
+                </div>
+                <div class="scale-step active" data-step="3">
+                  <span class="step-dot"></span>
+                  <span class="step-num">3</span>
+                  <span class="step-label">Good</span>
+                </div>
+                <div class="scale-step active" data-step="4">
+                  <span class="step-dot"></span>
+                  <span class="step-num">4</span>
+                  <span class="step-label">Great</span>
+                </div>
+                <div class="scale-step active" data-step="5">
+                  <span class="step-dot"></span>
+                  <span class="step-num">5</span>
+                  <span class="step-label">Outstanding</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Required Feedback Questions -->
+          <div class="form-field">
+            <label for="volunteerComments" class="field-label">
+              <span>VOLUNTEER TEAM FEEDBACK</span>
+              <span style="color: var(--blue);">*</span>
+            </label>
+            <textarea id="volunteerComments" class="field-textarea" placeholder="How did you find team coordination, communication, or support?" required></textarea>
+          </div>
+
+          <div class="form-field">
+            <label for="improvements" class="field-label">
+              <span>SUGGESTIONS FOR NEXT TIME</span>
+              <span style="color: var(--blue);">*</span>
+            </label>
+            <textarea id="improvements" class="field-textarea" placeholder="Any tools, scheduling, or support improvements for next time?" required></textarea>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" id="submitBtn" class="btn-action btn-primary">
+            Submit Feedback & Unlock Certificate
+          </button>
+        </form>
+      </section>
+
+      <!-- Certificate Preview Column -->
+      <aside class="certificate-preview-box">
+        <h3 class="card-title">Official Certificate Preview</h3>
+        <p class="card-subtitle">Live real-time preview of your Certificate of Service</p>
+
+        <div class="canvas-wrapper">
+          <canvas id="certCanvas"></canvas>
+
+          <!-- Locked Overlay -->
+          <div id="lockedOverlay" class="locked-overlay">
+            <div class="locked-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div class="locked-title">Certificate Locked</div>
+            <p class="locked-desc">Complete your volunteer debrief on the left to unlock your official Certificate of Service.</p>
+          </div>
+        </div>
+
+        <!-- Download Buttons -->
+        <div class="download-grid">
+          <button type="button" id="downloadVolunteerPng" class="btn-action btn-secondary" disabled>
+            Download PNG
+          </button>
+          <button type="button" id="downloadVolunteerPdf" class="btn-action btn-secondary" disabled>
+            Download PDF
+          </button>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+
+  <div id="toastMsg" class="toast-msg"></div>
+
+  <script src="js/certificate.js"></script>
+  <script src="js/volunteer.js"></script>
+</body>
+</html>

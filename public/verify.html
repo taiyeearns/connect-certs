@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GritinAI Connect 2.0 — Credential Verification</title>
+  <meta name="description" content="Verify the authenticity of GritinAI Connect 2.0 certificates.">
+
+  <!-- Google Fonts: Space Grotesk & Space Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/png" href="assets/connect2.png">
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header class="header-bar">
+    <a href="/" class="brand-logo-link">
+      <img src="assets/connect2.png" alt="GritinAI Connect 2.0 Logo" class="brand-logo-img">
+    </a>
+    <nav class="header-nav">
+      <a href="/" class="nav-link">Attendee Portal</a>
+      <a href="/volunteer" class="nav-link">Volunteer Portal</a>
+    </nav>
+  </header>
+
+  <main class="main-wrapper">
+    <div class="card-box" style="max-width: 600px; margin: 40px auto; text-align: center;">
+      <div class="category-pill">
+        <span class="status-dot"></span>
+        OFFICIAL VERIFICATION PORTAL
+      </div>
+      <h1 class="main-heading" style="font-size: 2rem;">Verify Credential Authenticity</h1>
+      <p class="card-subtitle">Enter any GritinAI Connect 2.0 Certificate ID to authenticate its validity.</p>
+
+      <div class="form-field" style="text-align: left; margin-bottom: 20px;">
+        <label for="certIdInput" class="field-label">CERTIFICATE ID</label>
+        <input type="text" id="certIdInput" class="field-input" placeholder="e.g. GAC2-ATT-12345 or GAC2-VOL-54321" style="font-family: var(--font-mono); text-transform: uppercase;">
+      </div>
+
+      <button type="button" id="verifyBtn" class="btn-action btn-primary" style="margin-bottom: 24px;">
+        Verify Credential
+      </button>
+
+      <!-- Result Card -->
+      <div id="verifyResult" class="hidden" style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; text-align: left;">
+        <div id="resultStatus" style="font-family: var(--font-mono); font-size: 13px; font-weight: 700; margin-bottom: 12px;"></div>
+        <div id="resultDetails" style="font-size: 14px; line-height: 1.6; color: var(--text-muted);"></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const input = document.getElementById('certIdInput');
+    const btn = document.getElementById('verifyBtn');
+    const resultBox = document.getElementById('verifyResult');
+    const resultStatus = document.getElementById('resultStatus');
+    const resultDetails = document.getElementById('resultDetails');
+
+    // Auto-check if URL has ?id=...
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialId = urlParams.get('id');
+    if (initialId) {
+      input.value = initialId;
+      doVerify(initialId);
+    }
+
+    btn.addEventListener('click', () => {
+      const id = input.value.trim();
+      if (!id) return;
+      doVerify(id);
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') btn.click();
+    });
+
+    async function doVerify(certId) {
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
+      resultBox.classList.add('hidden');
+
+      try {
+        const res = await fetch('/api/verify/' + encodeURIComponent(certId));
+        const data = await res.json();
+
+        resultBox.classList.remove('hidden');
+
+        if (res.ok && data.verified) {
+          resultStatus.innerHTML = '<span style="color: var(--emerald);">✓ OFFICIAL VERIFIED CREDENTIAL</span>';
+          resultDetails.innerHTML = `
+            <strong style="color: #fff; font-size: 16px;">${data.recipientName}</strong><br>
+            <strong>Award:</strong> ${data.type}<br>
+            <strong>Event:</strong> ${data.event}<br>
+            ${data.department ? '<strong>Department:</strong> ' + data.department + '<br>' : ''}
+            <strong>Issue Date:</strong> ${data.issuedDate}<br>
+            <strong>Verification Code:</strong> <span style="font-family: var(--font-mono); color: var(--blue-bright);">${data.certificateId}</span>
+          `;
+        } else {
+          resultStatus.innerHTML = '<span style="color: var(--red);">✗ INVALID OR UNRECOGNIZED CERTIFICATE</span>';
+          resultDetails.innerHTML = 'No record was found matching this certificate code. Please double-check the ID or contact the organizing committee.';
+        }
+      } catch (err) {
+        resultBox.classList.remove('hidden');
+        resultStatus.innerHTML = '<span style="color: var(--red);">ERROR</span>';
+        resultDetails.innerHTML = 'Unable to connect to verification service. Please try again.';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Verify Credential';
+      }
+    }
+  </script>
+</body>
+</html>

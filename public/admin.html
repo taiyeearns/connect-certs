@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GritinAI Connect 2.0 — Organizer Feedback & Analytics</title>
+
+  <!-- Google Fonts: Rubik, Space Grotesk & Space Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/png" href="assets/connect2.png">
+</head>
+<body>
+
+  <!-- Top Header - Logo & Portal Badge -->
+  <header class="header-bar admin-header-nav">
+    <div style="display: flex; align-items: center; gap: 14px;">
+      <a href="/admin" class="brand-logo-link">
+        <img src="assets/connect2.png" alt="GritinAI Connect 2.0 Logo" class="brand-logo-img">
+      </a>
+      <span class="badge-role badge-admin-portal">ORGANIZER PORTAL</span>
+    </div>
+    <div id="headerAuthActions" class="hidden">
+      <button type="button" id="logoutBtn" class="btn-action btn-secondary" style="width: auto; padding: 9px 20px; font-size: 14.5px;">
+        Sign Out
+      </button>
+    </div>
+  </header>
+
+  <main class="main-wrapper admin-wrapper">
+
+    <!-- Passkey Login Gate Section -->
+    <section id="loginSection" class="card-box admin-login-card">
+      <div class="login-icon-wrap">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      </div>
+      <h1 class="main-heading" style="font-size: 1.95rem; margin-bottom: 8px;">Organizer Access</h1>
+      <p class="card-subtitle" style="margin-bottom: 24px; font-size: 15.5px;">Enter the organizer passkey to access attendee ratings, volunteer debriefs, and CSV downloads.</p>
+
+      <div class="form-field" style="text-align: left;">
+        <label for="adminPin" class="field-label">ORGANIZER PASSKEY</label>
+        <input type="password" id="adminPin" class="field-input" placeholder="Enter organizer passkey" autocomplete="current-password">
+        <span id="loginError" class="login-error-text hidden"></span>
+      </div>
+
+      <button type="button" id="loginBtn" class="btn-action btn-primary" style="margin-top: 14px;">
+        Unlock Dashboard
+      </button>
+
+      <div class="login-hint">
+        Default passkey: <code>gritinai2026</code>
+      </div>
+    </section>
+
+    <!-- Main Dashboard Section (Revealed after unlocking) -->
+    <section id="dashboardSection" class="hidden">
+      
+      <!-- Dashboard Header -->
+      <div class="admin-header">
+        <div>
+          <h1 class="main-heading" style="font-size: 2.1rem; margin-bottom: 6px;">Conference Feedback & Analytics</h1>
+          <p class="main-subheading" style="font-size: 16px;">Real-time responses, evaluations, and certificate credentials from GritinAI Connect 2.0.</p>
+        </div>
+        <div class="admin-header-actions">
+          <button type="button" id="refreshBtn" class="btn-action btn-secondary" style="width: auto; padding: 12px 22px;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: text-bottom; margin-right: 6px;"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+            Refresh
+          </button>
+          <button type="button" id="exportCsvBtn" class="btn-action btn-emerald" style="width: auto; padding: 12px 24px;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: text-bottom; margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+            Export All to CSV
+          </button>
+          <button type="button" id="clearRecordsBtn" class="btn-action btn-danger" style="width: auto; padding: 12px 20px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 6px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            Clear All Records
+          </button>
+        </div>
+      </div>
+
+      <!-- Live KPI Stat Cards -->
+      <div class="admin-stats-grid">
+        <div class="stat-card">
+          <div class="stat-num" id="statTotal">0</div>
+          <div class="stat-title">Total Submissions</div>
+        </div>
+        <div class="stat-card emerald">
+          <div class="stat-num" id="statAttendees">0</div>
+          <div class="stat-title">Attendees</div>
+        </div>
+        <div class="stat-card purple">
+          <div class="stat-num" id="statVolunteers">0</div>
+          <div class="stat-title">Volunteers</div>
+        </div>
+        <div class="stat-card amber">
+          <div class="stat-num" id="statRating">0.0</div>
+          <div class="stat-title">Average Experience Rating</div>
+        </div>
+      </div>
+
+      <!-- Controls: Search & Filter -->
+      <div class="table-controls">
+        <div style="flex: 1; min-width: 260px;">
+          <input type="text" id="searchInput" class="field-input" placeholder="Search by participant name, email, cert ID...">
+        </div>
+        <div style="min-width: 170px;">
+          <select id="roleFilter" class="field-select">
+            <option value="all">All Roles</option>
+            <option value="attendee">Attendees Only</option>
+            <option value="volunteer">Volunteers Only</option>
+          </select>
+        </div>
+        <div style="min-width: 240px;" id="teamFilterWrap">
+          <select id="teamFilter" class="field-select">
+            <option value="all">All Volunteer Teams</option>
+            <option value="Ushering & Protocol">Ushering & Protocol</option>
+            <option value="Media, Content & Technical">Media, Content & Technical</option>
+            <option value="Registration">Registration</option>
+            <option value="Welfare, Logistics & Operations">Welfare, Logistics & Operations</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Submissions Table -->
+      <div class="table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Participant</th>
+              <th>Role & Team</th>
+              <th>Overall Rating</th>
+              <th>Certificate ID</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="feedbackTableBody"></tbody>
+        </table>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Modal Details -->
+  <div id="detailModal" class="modal-overlay">
+    <div class="modal-box">
+      <button type="button" id="modalCloseBtn" class="modal-close-btn" aria-label="Close modal">&times;</button>
+      <h3 class="card-title" style="margin-bottom: 20px; font-size: 1.5rem;">Feedback Submission Details</h3>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <script src="js/admin.js"></script>
+</body>
+</html>
