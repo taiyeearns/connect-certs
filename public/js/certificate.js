@@ -77,8 +77,8 @@ const CertEngine = (function() {
     const w = 260;
     const h = Math.round(w * (ribbon.naturalHeight || ribbon.height) / (ribbon.naturalWidth || ribbon.width));
     const pasteX = Math.round(1280 - w / 2);
-    // Align circular seal center at Y=1475 (offset is ~0.323 of total height)
-    const pasteY = Math.round(1475 - 0.323 * h);
+    // Align circular seal center at Y=1475 (offset is ~0.316 of total height)
+    const pasteY = Math.round(1475 - 0.316 * h);
     ctx.drawImage(ribbon, pasteX, pasteY, w, h);
   }
 
