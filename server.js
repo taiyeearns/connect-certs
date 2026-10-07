@@ -3,19 +3,39 @@ const fs = require('fs');
 const path = require('path');
 
 let PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
-const DATA_DIR = path.join(__dirname, 'data');
+const isVercel = !!process.env.VERCEL;
+const DATA_DIR = isVercel ? '/tmp' : path.join(__dirname, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'feedback.json');
 const ADMIN_KEY = process.env.ADMIN_KEY || 'gritinai2026';
 
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+function initDataStorage() {
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    if (!fs.existsSync(DATA_FILE)) {
+      const initialFile = path.join(__dirname, 'data', 'feedback.json');
+      if (fs.existsSync(initialFile)) {
+        try {
+          fs.copyFileSync(initialFile, DATA_FILE);
+        } catch (_) {
+          fs.writeFileSync(DATA_FILE, '[]', 'utf-8');
+        }
+      } else {
+        fs.writeFileSync(DATA_FILE, '[]', 'utf-8');
+      }
+    }
+  } catch (err) {
+    console.warn('Storage init note:', err.message);
+  }
 }
-if (!fs.existsSync(DATA_FILE)) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify([], null, 2), 'utf-8');
-}
+initDataStorage();
 
 function readFeedback() {
   try {
+    if (!fs.existsSync(DATA_FILE)) {
+      initDataStorage();
+    }
     const raw = fs.readFileSync(DATA_FILE, 'utf-8');
     return JSON.parse(raw);
   } catch (err) {
@@ -26,6 +46,9 @@ function readFeedback() {
 
 function writeFeedback(data) {
   try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
     fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
     return true;
   } catch (err) {
@@ -50,7 +73,7 @@ const MIME_TYPES = {
   '.ttf': 'font/ttf'
 };
 
-const server = http.createServer((req, res) => {
+function requestHandler(req, res) {
   const parsedUrl = new URL(req.url, 'http://' + (req.headers.host || 'localhost'));
   const pathname = parsedUrl.pathname;
 
@@ -322,9 +345,10 @@ const server = http.createServer((req, res) => {
     const stream = fs.createReadStream(filePath);
     stream.pipe(res);
   });
-});
+}
 
 function startServer(port) {
+  const server = http.createServer(requestHandler);
   server.listen(port, () => {
     console.log('\n======================================================');
     console.log('🌟 GritinAI Feedback & Certificate Portal is LIVE!');
@@ -344,8 +368,12 @@ function startServer(port) {
       console.error('Server error:', err);
     }
   });
+
+  return server;
 }
 
-startServer(PORT);
+if (require.main === module) {
+  startServer(PORT);
+}
 
-module.exports = server;
+module.exports = requestHandler;

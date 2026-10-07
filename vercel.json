@@ -1,15 +1,9 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "server.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "server.js"
-    }
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/volunteer", "destination": "/volunteer.html" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/verify", "destination": "/verify.html" },
+    { "source": "/api/:path*", "destination": "/api" }
   ]
 }
