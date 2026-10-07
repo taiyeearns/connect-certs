@@ -74,8 +74,21 @@ const MIME_TYPES = {
 };
 
 function requestHandler(req, res) {
-  const parsedUrl = new URL(req.url, 'http://' + (req.headers.host || 'localhost'));
-  const pathname = parsedUrl.pathname;
+  const host = req.headers.host || 'localhost';
+  const parsedUrl = new URL(req.url, 'http://' + host);
+  let pathname = parsedUrl.pathname;
+
+  // Resilient pathname determination (handles proxy/Vercel rewrite headers)
+  const matchedPath = req.headers['x-matched-path'] || req.headers['x-forwarded-uri'];
+  if (matchedPath && (pathname === '/api' || pathname === '/api/index' || pathname === '/' || pathname.endsWith('/api'))) {
+    pathname = matchedPath.split('?')[0];
+  }
+
+  // Centralized robust admin key check
+  const queryKey = parsedUrl.searchParams.get('key') || (req.query && req.query.key) || '';
+  const headerKey = req.headers['x-admin-key'] || '';
+  const providedKey = (headerKey || queryKey).toString().trim();
+  const isAuthorized = providedKey === ADMIN_KEY.trim();
 
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -153,8 +166,7 @@ function requestHandler(req, res) {
   // GET /api/feedback: Admin fetch feedback
   // POST /api/clear: Admin clear all feedback records (for testing)
   if (pathname === '/api/clear' && req.method === 'POST') {
-    const adminKey = req.headers['x-admin-key'] || parsedUrl.searchParams.get('key');
-    if (adminKey !== ADMIN_KEY) {
+    if (!isAuthorized) {
       res.writeHead(401, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: 'Unauthorized: Invalid Admin Key' }));
       return;
@@ -167,8 +179,7 @@ function requestHandler(req, res) {
   }
 
   if (pathname === '/api/feedback' && req.method === 'GET') {
-    const adminKey = req.headers['x-admin-key'] || parsedUrl.searchParams.get('key');
-    if (adminKey !== ADMIN_KEY) {
+    if (!isAuthorized) {
       res.writeHead(401, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: 'Unauthorized: Invalid Admin Key' }));
       return;
@@ -185,8 +196,7 @@ function requestHandler(req, res) {
 
   // GET /api/stats: Aggregate stats for admin dashboard
   if (pathname === '/api/stats' && req.method === 'GET') {
-    const adminKey = req.headers['x-admin-key'] || parsedUrl.searchParams.get('key');
-    if (adminKey !== ADMIN_KEY) {
+    if (!isAuthorized) {
       res.writeHead(401, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: 'Unauthorized' }));
       return;
@@ -222,8 +232,7 @@ function requestHandler(req, res) {
 
   // GET /api/export-csv: Admin download CSV
   if (pathname === '/api/export-csv' && req.method === 'GET') {
-    const adminKey = req.headers['x-admin-key'] || parsedUrl.searchParams.get('key');
-    if (adminKey !== ADMIN_KEY) {
+    if (!isAuthorized) {
       res.writeHead(401, { 'Content-Type': 'text/plain' });
       res.end('Unauthorized');
       return;

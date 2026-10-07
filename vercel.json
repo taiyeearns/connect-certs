@@ -3,7 +3,6 @@
   "rewrites": [
     { "source": "/volunteer", "destination": "/volunteer.html" },
     { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/verify", "destination": "/verify.html" },
-    { "source": "/api/:path*", "destination": "/api" }
+    { "source": "/verify", "destination": "/verify.html" }
   ]
 }
