@@ -164,6 +164,62 @@ function requestHandler(req, res) {
   }
 
   // GET /api/feedback: Admin fetch feedback
+  // DELETE /api/feedback: Admin delete individual record
+  if ((pathname === '/api/feedback' && req.method === 'DELETE') ||
+      (pathname === '/api/delete' && req.method === 'POST') ||
+      (pathname.startsWith('/api/feedback/') && req.method === 'DELETE')) {
+    if (!isAuthorized) {
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Unauthorized: Invalid Admin Key' }));
+      return;
+    }
+
+    let targetId = parsedUrl.searchParams.get('id');
+    if (!targetId && pathname.startsWith('/api/feedback/')) {
+      targetId = pathname.replace('/api/feedback/', '').trim();
+    }
+
+    const processDelete = (idToDelete) => {
+      if (!idToDelete) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Record ID is required.' }));
+        return;
+      }
+
+      let feedbacks = readFeedback();
+      const initialLength = feedbacks.length;
+      feedbacks = feedbacks.filter(f => f.id !== idToDelete && f.certificateId !== idToDelete);
+
+      if (feedbacks.length === initialLength) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Record not found.' }));
+        return;
+      }
+
+      writeFeedback(feedbacks);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, message: 'Record deleted successfully.' }));
+    };
+
+    if (targetId) {
+      processDelete(targetId);
+      return;
+    }
+
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => {
+      try {
+        const payload = JSON.parse(body || '{}');
+        processDelete(payload.id);
+      } catch (_) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Invalid JSON payload' }));
+      }
+    });
+    return;
+  }
+
   // POST /api/clear: Admin clear all feedback records (for testing)
   if (pathname === '/api/clear' && req.method === 'POST') {
     if (!isAuthorized) {

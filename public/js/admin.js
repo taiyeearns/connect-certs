@@ -179,13 +179,19 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="admin-cert-id">${item.certificateId || 'N/A'}</span>
         </td>
         <td>
-          <button type="button" class="btn-action btn-secondary view-btn" style="width: auto; padding: 7px 14px; font-size: 13.5px;" data-id="${item.id}">
-            View Feedback
-          </button>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button type="button" class="btn-action btn-secondary view-btn" style="width: auto; padding: 6px 12px; font-size: 13px;" data-id="${item.id}">
+              View
+            </button>
+            <button type="button" class="btn-action btn-danger-outline delete-btn" style="width: auto; padding: 6px 12px; font-size: 13px;" data-id="${item.id}" title="Delete this record">
+              Delete
+            </button>
+          </div>
         </td>
       `;
 
       tr.querySelector('.view-btn').addEventListener('click', () => openModal(item));
+      tr.querySelector('.delete-btn').addEventListener('click', () => deleteSingleRecord(item));
       tableBody.appendChild(tr);
     });
   }
@@ -247,9 +253,52 @@ document.addEventListener('DOMContentLoaded', () => {
           </a>
         </div>
       </div>
+
+      <div style="margin-top: 24px; padding-top: 18px; border-top: 1.5px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+        <button type="button" id="modalDeleteBtn" class="btn-action btn-danger-outline" style="width: auto; padding: 8px 16px; font-size: 13.5px;">
+          Delete This Record
+        </button>
+        <button type="button" id="modalDismissBtn" class="btn-action btn-secondary" style="width: auto; padding: 8px 16px; font-size: 13.5px;">
+          Close
+        </button>
+      </div>
     `;
 
+    const modalDeleteBtn = modalContent.querySelector('#modalDeleteBtn');
+    if (modalDeleteBtn) {
+      modalDeleteBtn.addEventListener('click', () => deleteSingleRecord(item));
+    }
+    const modalDismissBtn = modalContent.querySelector('#modalDismissBtn');
+    if (modalDismissBtn) {
+      modalDismissBtn.addEventListener('click', () => detailModal.classList.remove('open'));
+    }
+
     detailModal.classList.add('open');
+  }
+
+  async function deleteSingleRecord(item) {
+    const confirmMsg = `Are you sure you want to delete the response from "${item.fullName}" (${item.certificateId})?\n\nThis will permanently remove their record and revoke certificate verification.`;
+    if (!confirm(confirmMsg)) return;
+
+    try {
+      const res = await fetch('/api/feedback?id=' + encodeURIComponent(item.id) + '&key=' + encodeURIComponent(currentKey), {
+        method: 'DELETE',
+        headers: {
+          'x-admin-key': currentKey
+        }
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        detailModal.classList.remove('open');
+        await loadDashboardData();
+        alert('Record for "' + item.fullName + '" deleted successfully.');
+      } else {
+        alert(data.error || 'Failed to delete record.');
+      }
+    } catch (err) {
+      alert('Network error while deleting record. Please try again.');
+    }
   }
 
   modalCloseBtn.addEventListener('click', () => {
